@@ -7,12 +7,16 @@
 $(function() {
     function QuadfrostViewModel(parameters) {
         var self = this;
+        self.settings = parameters[0];
+        self.serialPort = ko.observable();
 
-        // assign the injected parameters, e.g.:
-        // self.loginStateViewModel = parameters[0];
-        // self.settingsViewModel = parameters[1];
+        self.connectToSerial = function() {
+            self.currentSerialPort(self.newSerialPort);
+        };
 
-        // TODO: Implement your plugin's view model here.
+        self.onBeforeBinding = function() {
+            self.serialPort(self.settings.settings.plugins.quadfrost.port());
+        };
     }
 
     /* view model class, parameters for constructor, container to bind to
@@ -22,7 +26,7 @@ $(function() {
     OCTOPRINT_VIEWMODELS.push({
         construct: QuadfrostViewModel,
         // ViewModels your plugin depends on, e.g. loginStateViewModel, settingsViewModel, ...
-        dependencies: [ /* "loginStateViewModel", "settingsViewModel" */ ],
+        dependencies: ["settingsViewModel"],
         // Elements to bind to, e.g. #settings_plugin_quadfrost, #tab_plugin_quadfrost, ...
         elements: [ /* ... */ ]
     });

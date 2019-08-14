@@ -1,4 +1,4 @@
-import pyserial
+import serial
 
 MODE_LAMP = 1
 MODE_HUE = 2
@@ -41,7 +41,7 @@ class HueMode:
 
 class QuadFrost:
     def __init__(self, port, baudrate=19200):
-        self.ser = pyserial.Serial(port, baudrate=baudrate)
+        self.ser = serial.Serial(port, baudrate=baudrate)
         self.modes = [
             EmptyMode(),
             LampMode(self),

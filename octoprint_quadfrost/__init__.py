@@ -10,6 +10,7 @@ from __future__ import absolute_import
 # Take a look at the documentation on what other plugin mixins are available.
 
 import octoprint.plugin
+from .quadfrost import QuadFrost
 
 class QuadfrostPlugin(
 	octoprint.plugin.StartupPlugin,
@@ -18,8 +19,14 @@ class QuadfrostPlugin(
 	octoprint.plugin.AssetPlugin,
 	octoprint.plugin.TemplatePlugin):
 
-	def on_startup(self, host, port):
-		pass
+	def on_after_startup(self):
+		port = self._settings.get(['port'])
+		self._logger.info('Connecting to %s' % port)
+		self.quadfrost = None
+		try:
+			self.quadfrost = QuadFrost(port)
+		except Exception as e:
+			self._logger.error(e)
 	
 	def get_template_configs(self):
 		return [
