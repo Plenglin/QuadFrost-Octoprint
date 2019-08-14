@@ -1,0 +1,4 @@
+include README.md
+recursive-include octoprint_quadfrost/templates *
+recursive-include octoprint_quadfrost/translations *
+recursive-include octoprint_quadfrost/static *
