@@ -2,6 +2,7 @@
 
 #include "FastLED.h"
 #include "mode.hpp"
+#include "util/sleep.hpp"
 
 namespace quadfrost {
   template <int count>
@@ -12,9 +13,8 @@ namespace quadfrost {
     byte hue_step = 1;
     byte sat = 255;
     byte val = 255;
-    int target_delta = 25;
-    int sleep_time = target_delta;
-
+    
+    AdaptiveSleeper<> sleeper = AdaptiveSleeper<>(25);
   public:
     static const char SET_HUE_START = 0x81;
     static const char SET_HUE_END = 0x82;
@@ -31,13 +31,7 @@ namespace quadfrost {
       fill_gradient(leds, 0, CHSV(hue_start, sat, val), count - 1, CHSV(hue_end, sat, val), FORWARD_HUES);
       FastLED.show();
 
-      // Adaptive sleeper
-      if (delta < target_delta) {
-        sleep_time++;
-      } else if (delta > target_delta) {
-        sleep_time--;
-      }
-      delay(sleep_time);
+      sleeper.sleep(delta);
     }
 
     void on_command(char command) override {
@@ -60,7 +54,7 @@ namespace quadfrost {
       case SET_PERIOD: {
         int high = Serial.read();
         int low = Serial.read();
-        target_delta = (high << 4) | low;
+        sleeper.target_sleep = (high << 4) | low;
         Serial.write(2);
         Serial.write(high);
         Serial.write(low);
