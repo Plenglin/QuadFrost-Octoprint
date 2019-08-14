@@ -11,49 +11,35 @@ from __future__ import absolute_import
 
 import octoprint.plugin
 
-class QuadfrostPlugin(octoprint.plugin.SettingsPlugin,
-                      octoprint.plugin.AssetPlugin,
-                      octoprint.plugin.TemplatePlugin):
+class QuadfrostPlugin(
+	octoprint.plugin.StartupPlugin,
+	octoprint.plugin.ShutdownPlugin,
+	octoprint.plugin.SettingsPlugin,
+	octoprint.plugin.AssetPlugin,
+	octoprint.plugin.TemplatePlugin):
 
-	##~~ SettingsPlugin mixin
+	def on_startup(self, host, port):
+		pass
+	
+	def get_template_configs(self):
+		return [
+			dict(type="tab", custom_bindings=False)
+		]
 
 	def get_settings_defaults(self):
 		return dict(
-			# put your plugin's default settings here
+			port='/dev/ttyACM0'
 		)
 
-	##~~ AssetPlugin mixin
-
 	def get_assets(self):
-		# Define your plugin's asset files to automatically include in the
-		# core UI here.
 		return dict(
 			js=["js/quadfrost.js"],
 			css=["css/quadfrost.css"],
 			less=["less/quadfrost.less"]
 		)
-
-	##~~ Softwareupdate hook
-
-	def get_update_information(self):
-		# Define the configuration for your plugin to use with the Software Update
-		# Plugin here. See https://github.com/foosel/OctoPrint/wiki/Plugin:-Software-Update
-		# for details.
-		return dict(
-			quadfrost=dict(
-				displayName="Quadfrost Plugin",
-				displayVersion=self._plugin_version,
-
-				# version check: github repository
-				type="github_release",
-				user="you",
-				repo="QuadFrost-Octoprint",
-				current=self._plugin_version,
-
-				# update method: pip
-				pip="https://github.com/you/QuadFrost-Octoprint/archive/{target_version}.zip"
-			)
-		)
+	
+	def on_shutdown(self):
+		pass
 
 
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
@@ -64,9 +50,4 @@ __plugin_name__ = "Quadfrost Plugin"
 def __plugin_load__():
 	global __plugin_implementation__
 	__plugin_implementation__ = QuadfrostPlugin()
-
-	global __plugin_hooks__
-	__plugin_hooks__ = {
-		"octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information
-	}
 
