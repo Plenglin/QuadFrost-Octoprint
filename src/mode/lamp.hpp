@@ -25,6 +25,7 @@ namespace quadfrost {
           byte b = Serial.read();
           auto color = CRGB(r, g, b);
           write_color(color);
+          Serial.write(3);
           Serial.write(color.r);
           Serial.write(color.g);
           Serial.write(color.b);

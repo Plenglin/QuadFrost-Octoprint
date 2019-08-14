@@ -3,8 +3,7 @@
 namespace quadfrost {
   namespace commands {
     const char SET_MODE = 0x01;
-    const char FILTER_ON = 0x03;
-    const char FILTER_OFF = 0x04;
+    const char SET_FILTER = 0x03;
 
     /** 0x80-0xff are reserved for modes to use */
   }

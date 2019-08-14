@@ -28,6 +28,7 @@ void setup() {
   analogWrite(FILTER_PIN, 0);
   Serial.write(events::READY);
   pinMode(13, OUTPUT);
+  //pinMode(FILTER_PIN, OUTPUT);
   digitalWrite(13, LOW);
 }
 
@@ -38,10 +39,9 @@ void switch_mode(unsigned char target_mode) {
 }
 
 void read_commands() {
-  if (Serial.available() > 0) {
-    char command = Serial.read();
+  char command = Serial.read();
+  if (command != -1) {
     delay(10);
-    digitalWrite(13, HIGH);
     Serial.write(events::ACK);
     Serial.write(command);
 
@@ -52,13 +52,17 @@ void read_commands() {
         case commands::SET_MODE: {
           int mode = Serial.read();
           switch_mode(mode);
+          Serial.write(1);
           Serial.write(mode);
           break;
         }
-        case commands::FILTER_ON:
-          analogWrite(FILTER_PIN, 200);
-        case commands::FILTER_OFF:
-          analogWrite(FILTER_PIN, 0);
+        case commands::SET_FILTER: {
+          int power = Serial.read();
+          analogWrite(FILTER_PIN, power);
+          Serial.write(1);
+          Serial.write(power);
+          break;
+        }
         default:
           break;
       }
@@ -68,5 +72,5 @@ void read_commands() {
 
 void loop() {
   read_commands();
-  delay(1000);
+  delay(100);
 }
