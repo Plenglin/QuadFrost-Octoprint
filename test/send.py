@@ -13,18 +13,19 @@ def read_ack(ser):
 
 print(ser.read())
 
-ser.write(b'\x01\x01')
+ser.write(b'\x01\x02')
 print([hex(c) for c in read_ack(ser)])
 
-ser.write(b'\x81\xff\x00\x00')
+ser.write(b'\x81\xff')
 print([hex(c) for c in read_ack(ser)])
 
-ser.write(b'\x03\xff')
+ser.write(b'\x82\x80')
 print([hex(c) for c in read_ack(ser)])
 
-time.sleep(3)
+ser.write(b'\x83\x50')
+print([hex(c) for c in read_ack(ser)])
 
-ser.write(b'\x03\x00')
+ser.write(b'\x86\x00\x64')
 print([hex(c) for c in read_ack(ser)])
 
 ser.close()
