@@ -13,19 +13,19 @@ def read_ack(ser):
 
 print(ser.read())
 
-ser.write(b'\x01\x02')
+ser.write(b'\x01\x02')  # Mode 2
 print([hex(c) for c in read_ack(ser)])
 
-ser.write(b'\x81\xff')
+ser.write(b'\x81\xff')  # Start hue 255
 print([hex(c) for c in read_ack(ser)])
 
-ser.write(b'\x82\x80')
+ser.write(b'\x82\x80')  # End hue 128
 print([hex(c) for c in read_ack(ser)])
 
-ser.write(b'\x83\x50')
+ser.write(b'\x83\x01')  # Step hue 0x10
 print([hex(c) for c in read_ack(ser)])
 
-ser.write(b'\x86\x00\x64')
+ser.write(b'\x86\x00\x10')  # Period 0x64
 print([hex(c) for c in read_ack(ser)])
 
 ser.close()

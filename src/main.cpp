@@ -1,15 +1,12 @@
 #include <Arduino.h>
 #include <FastLED.h>
 
+#include "constants.hpp"
 #include "mode/lamp.hpp"
 #include "mode/hue.hpp"
-#include "protocol.hpp"
 
 #define COMM_BAUD 19200
 #define LED_COUNT 16
-#define LED_PIN 8
-#define FILTER_PIN 9
-#define TEMPERATURE_PIN A0
 #define MODES_COUNT 3
 
 using namespace quadfrost;
@@ -23,15 +20,17 @@ Mode* modes[MODES_COUNT] = {
 Mode* mode = modes[0];
 
 void setup() {
-  Serial.begin(COMM_BAUD);
-  FastLED.addLeds<WS2812B, LED_PIN, BRG>(leds, LED_COUNT);
+  FastLED.addLeds<WS2812B, pins::LED_PIN, BRG>(leds, LED_COUNT);
+  pinMode(pins::FILTER_PIN, OUTPUT);
+  pinMode(pins::LCD_BACKLIGHT_PIN, OUTPUT);
+  pinMode(pins::DOOR_SWITCH_PIN, INPUT_PULLUP);
+
+  analogWrite(pins::FILTER_PIN, 0);
   fill_solid(leds, LED_COUNT, CRGB::Black);
   FastLED.show();
-  analogWrite(FILTER_PIN, 0);
+
+  Serial.begin(COMM_BAUD);
   Serial.write(events::READY);
-  pinMode(13, OUTPUT);
-  //pinMode(FILTER_PIN, OUTPUT);
-  digitalWrite(13, LOW);
 }
 
 bool switch_mode(unsigned char target_mode) {
@@ -62,9 +61,15 @@ void read_commands() {
           Serial.write(success);
           break;
         }
+        case commands::SET_LCD_BACKLIGHT: {
+          bool state = Serial.read();
+          digitalWrite(pins::LCD_BACKLIGHT_PIN, state);
+          Serial.write(1);
+          Serial.write(state);
+        }
         case commands::SET_FILTER: {
           int power = Serial.read();
-          analogWrite(FILTER_PIN, power);
+          analogWrite(pins::FILTER_PIN, power);
           Serial.write(1);
           Serial.write(power);
           break;

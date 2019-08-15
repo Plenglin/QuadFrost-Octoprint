@@ -1,12 +1,21 @@
 #pragma once
+#include <Arduino.h>
 
 namespace quadfrost {
+  namespace pins {
+    const int LED_PIN = 8;
+    const int FILTER_PIN = 9;
+    const int TEMPERATURE_PIN = A0;
+    const int DOOR_SWITCH_PIN = A1;
+    const int LCD_BACKLIGHT_PIN = A2;
+  }
   namespace commands {
     const char SET_MODE = 0x01;
+    const char SET_LCD_BACKLIGHT = 0x02;
     const char SET_FILTER = 0x03;
 
     /** 0x80-0xff are reserved for modes to use */
-  }
+  } 
 
   namespace events {
     const char READY = 0x00;
