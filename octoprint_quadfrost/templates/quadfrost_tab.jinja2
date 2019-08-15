@@ -1,7 +1,7 @@
-<div class="input-append">
+<div id="tab-quadfrost" class="input-append">
     <input type="text" class="input-xxlarge" data-bind="value: serialPort">
     <button class="btn btn-primary" data-bind="click: connectToSerial">Connect</button>
-    
-    <input id="quadfrost-light" type="checkbox" class="custom-control-input">
-    <label class="custom-control-label" for="lamp">Turn on lights</label>
+
+    <input id="quadfrost-light" type="checkbox" class="custom-control-input" data-bind="value: lampState">
+    <label class="custom-control-label" for="lamp" data-bind="click: setLampState">Turn on lights</label>
 </div>
