@@ -2,6 +2,9 @@
     <input type="text" class="input-xxlarge" data-bind="value: serialPort">
     <button class="btn btn-primary" data-bind="click: connectToSerial">Connect</button>
 
-    <input id="quadfrost-light" type="checkbox" class="custom-control-input" data-bind="value: lampState">
-    <label class="custom-control-label" for="lamp" data-bind="click: setLampState">Turn on lights</label>
+    <input id="quadfrost-light" type="checkbox" class="custom-control-input" data-bind="checked: lampState">
+    <label class="custom-control-label" for="lamp">Lights</label>
+
+    <input id="quadfrost-filter" type="checkbox" class="custom-control-input" data-bind="checked: filterState">
+    <label class="custom-control-label" for="lamp">Filter</label>
 </div>

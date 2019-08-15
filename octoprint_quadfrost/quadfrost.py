@@ -1,6 +1,7 @@
 import serial
 
 
+MODE_EMPTY = 0
 MODE_LAMP = 1
 MODE_HUE = 2
 
@@ -52,6 +53,8 @@ class QuadFrost:
             LampMode(self),
             HueMode(self)
         ]
+        self.set_mode(MODE_EMPTY)
+        self.set_filter(0)
     
     def read_response(self):
         ev = ord(ser.read())
@@ -66,6 +69,10 @@ class QuadFrost:
         self.ser.write('\x01')
         self.ser.write(chr(mode_i))
         return mode
+    
+    def set_filter(self, power):
+        self.ser.write('\x03')
+        self.ser.write(chr(power))
 
     def close(self):
         self.ser.close()

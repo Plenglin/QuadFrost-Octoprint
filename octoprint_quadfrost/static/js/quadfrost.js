@@ -11,28 +11,41 @@ $(function() {
         self.settings = parameters[0];
         self.serialPort = ko.observable();
         self.lampState = ko.observable();
+        self.filterState = ko.observable();
 
-        self.connectToSerial = function() {
-            self.currentSerialPort(self.newSerialPort);
-        };
-
-        self.setLampState = function() {
-            var state = self.lampState();
-            console.log("Setting lamp state", state)
+        self.lampState.subscribe(function(state) {
+            console.log("Changing lamp state to", state)
             if (state) {
-                $.post('/plugin/quadfrostplugin/lamp', {
+                $.post('/plugin/quadfrost/lamp', {
                     red: 255,
                     green: 255,
                     blue: 255,
                 });
             } else {
-                $.post('/plugin/quadfrostplugin/lamp', {
+                $.post('/plugin/quadfrost/lamp', {
                     red: 0,
                     green: 0,
                     blue: 0,
                 });
             }
-        }
+        });
+
+        self.filterState.subscribe(function(state) {
+            console.log("Changing filter state to", state)
+            if (state) {
+                $.post('/plugin/quadfrost/filter', {
+                    power: 255
+                });
+            } else {
+                $.post('/plugin/quadfrost/filter', {
+                    power: 0
+                });
+            }
+        });
+
+        self.connectToSerial = function() {
+            self.currentSerialPort(self.newSerialPort);
+        };
 
         self.onBeforeBinding = function() {
             self.serialPort(self.settings.settings.plugins.quadfrost.port());
