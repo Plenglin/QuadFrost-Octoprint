@@ -13,6 +13,9 @@ def read_ack(ser):
 
 print(ser.read())
 
+ser.write(b'\x02\x01')  # Enable backlight
+print([hex(c) for c in read_ack(ser)])
+
 ser.write(b'\x01\x02')  # Mode 2
 print([hex(c) for c in read_ack(ser)])
 

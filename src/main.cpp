@@ -66,6 +66,7 @@ void read_commands() {
           digitalWrite(pins::LCD_BACKLIGHT_PIN, state);
           Serial.write(1);
           Serial.write(state);
+          break;
         }
         case commands::SET_FILTER: {
           int power = Serial.read();
