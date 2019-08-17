@@ -16,19 +16,19 @@ print(ser.read())
 ser.write(b'\x02\x01')  # Enable backlight
 print([hex(c) for c in read_ack(ser)])
 
-ser.write(b'\x01\x02')  # Mode 2
+ser.write(b'\x01\x03')  # Mode 3
 print([hex(c) for c in read_ack(ser)])
+ser.write(b'\x80')
+ser.write(b'\x01')
 
-ser.write(b'\x81\xff')  # Start hue 255
-print([hex(c) for c in read_ack(ser)])
+pos = 0
 
-ser.write(b'\x82\x80')  # End hue 128
-print([hex(c) for c in read_ack(ser)])
-
-ser.write(b'\x83\x05')  # Step hue
-print([hex(c) for c in read_ack(ser)])
-
-ser.write(b'\x86\x00\x10')  # Period
-print([hex(c) for c in read_ack(ser)])
+while True:
+    pos = (pos + 1) % 16
+    print(pos)
+    ser.write(b'\x81')
+    ser.write(b'\x00')
+    ser.write(bytearray(chr(pos), 'utf8'))
+    time.sleep(0.02)
 
 ser.close()

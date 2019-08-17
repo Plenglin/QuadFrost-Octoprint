@@ -6,11 +6,12 @@
 
 #include "constants.hpp"
 #include "mode/hue.hpp"
+#include "mode/directional.hpp"
 #include "mode/lamp.hpp"
 
 #define COMM_BAUD 19200
 #define LED_COUNT 16
-#define MODES_COUNT 3
+#define MODES_COUNT 4
 
 using namespace quadfrost;
 
@@ -18,7 +19,8 @@ CRGB leds[LED_COUNT];
 Mode* modes[MODES_COUNT] = {
   new Mode(),
   new LampMode<LED_COUNT>(leds),
-  new HueMode<LED_COUNT>(leds)
+  new HueMode<LED_COUNT>(leds),
+  new DirectionalMode<LED_COUNT>(leds)
 };
 Mode* mode = modes[0];
 
