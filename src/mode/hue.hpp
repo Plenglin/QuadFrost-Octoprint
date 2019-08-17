@@ -13,8 +13,7 @@ namespace quadfrost {
     byte hue_step = 1;
     byte sat = 255;
     byte val = 255;
-    
-    AdaptiveSleeper<> sleeper = AdaptiveSleeper<>(25);
+    unsigned int period = 50;
   public:
     static const char SET_HUE_START = 0x81;
     static const char SET_HUE_END = 0x82;
@@ -25,13 +24,12 @@ namespace quadfrost {
 
     HueMode(CRGB* leds) : leds(leds) {}
 
-    void loop(int delta) override {
+    unsigned int loop(int delta) override {
       hue_start += hue_step;
       hue_end += hue_step;
       fill_gradient(leds, 0, CHSV(hue_start, sat, val), count - 1, CHSV(hue_end, sat, val), FORWARD_HUES);
       FastLED.show();
-
-      sleeper.sleep(delta);
+      return period;
     }
 
     void on_command(char command) override {
@@ -54,7 +52,7 @@ namespace quadfrost {
       case SET_PERIOD: {
         int high = Serial.read();
         int low = Serial.read();
-        sleeper.target_sleep = (high << 4) | low;
+        period = (high << 4) | low;
         Serial.write(2);
         Serial.write(high);
         Serial.write(low);

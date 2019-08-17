@@ -3,7 +3,6 @@
 #include <Arduino.h>
 
 namespace quadfrost {
-  template <int compensation_rate = 1>
   class AdaptiveSleeper {
     int next_sleep;
   public:
@@ -11,10 +10,14 @@ namespace quadfrost {
     AdaptiveSleeper(int target_sleep)
         : next_sleep(target_sleep), target_sleep(target_sleep) {}
 
-    void sleep(unsigned long actual_period) {
+    void sleep(long actual_period) {
       int error = target_sleep - actual_period;
-      next_sleep += compensation_rate * error;
-      delay(next_sleep);
+      if (error > 0 || next_sleep > 0) {
+        next_sleep += error;
+      }
+      if (next_sleep > 0) {
+        delayMicroseconds(next_sleep);
+      }
     }
   };
 }

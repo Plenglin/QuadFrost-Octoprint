@@ -50,41 +50,46 @@ bool switch_mode(unsigned char target_mode) {
   return false;
 }
 
-void read_commands() {
-  char command = Serial.read();
-  if (command != -1) {
-    delay(10);
-    Serial.write(events::ACK);
-    Serial.write(command);
-
-    if ((command & 0x80) != 0) {
-      mode->on_command(command);
-    } else {
-      switch (command) {
-        case commands::SET_MODE: {
-          int mode = Serial.read();
-          bool success = switch_mode(mode);
-          Serial.write(1);
-          Serial.write(success);
-          break;
-        }
-        case commands::SET_LCD_BACKLIGHT: {
-          bool state = Serial.read();
-          lcd.setBacklight(state);
-          Serial.write(1);
-          Serial.write((char) state);
-          break;
-        }
-        case commands::SET_FILTER: {
-          int power = Serial.read();
-          analogWrite(pins::FILTER_PIN, power);
-          Serial.write(1);
-          Serial.write(power);
-          break;
-        }
-        default:
-          break;
+void execute_command(char command) {
+  if ((command & 0x80) != 0) {
+    mode->on_command(command);
+  } else {
+    switch (command) {
+      case commands::SET_MODE: {
+        int mode = Serial.read();
+        bool success = switch_mode(mode);
+        Serial.write(1);
+        Serial.write(success);
+        break;
       }
+      case commands::SET_LCD_BACKLIGHT: {
+        bool state = Serial.read();
+        lcd.setBacklight(state);
+        Serial.write(1);
+        Serial.write((char)state);
+        break;
+      }
+      case commands::SET_FILTER: {
+        int power = Serial.read();
+        analogWrite(pins::FILTER_PIN, power);
+        Serial.write(1);
+        Serial.write(power);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+}
+
+void read_commands() {
+  if (Serial.available() > 0) {
+    delay(10);
+    while (Serial.available() > 0) {
+      char command = Serial.read();
+      Serial.write(events::ACK);
+      Serial.write(command);
+      execute_command(command);
     }
   }
 }
@@ -101,13 +106,16 @@ int get_temperature() {
 }
 
 static unsigned long last_loop_time = 0;
+AdaptiveSleeper sleeper(50000);
 
 void loop() {
   unsigned long current_loop_time = millis();
   unsigned long delta = millis() - last_loop_time;
-  read_commands();
-  mode->loop(delta);
   last_loop_time = current_loop_time;
+
+  read_commands();
+
+  sleeper.target_sleep = mode->loop(delta) * 1000;
 
   lcd.setCursor(0, 0);
   lcd.print(String(digitalRead(pins::DOOR_SWITCH_PIN)));
@@ -115,5 +123,7 @@ void loop() {
   lcd.print(String(get_temperature()));
   lcd.print((char)0xdf);
   lcd.print("C");
+
+  sleeper.sleep(delta);
 }
 
