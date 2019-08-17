@@ -7,7 +7,6 @@ namespace quadfrost {
     const int FILTER_PIN = 9;
     const int TEMPERATURE_PIN = A0;
     const int DOOR_SWITCH_PIN = A1;
-    const int LCD_BACKLIGHT_PIN = A2;
   }
   namespace commands {
     const char SET_MODE = 0x01;

@@ -1,9 +1,12 @@
 #include <Arduino.h>
+#include <Wire.h>
+
 #include <FastLED.h>
+#include <LiquidCrystal_PCF8574.h>
 
 #include "constants.hpp"
-#include "mode/lamp.hpp"
 #include "mode/hue.hpp"
+#include "mode/lamp.hpp"
 
 #define COMM_BAUD 19200
 #define LED_COUNT 16
@@ -19,11 +22,15 @@ Mode* modes[MODES_COUNT] = {
 };
 Mode* mode = modes[0];
 
+LiquidCrystal_PCF8574 lcd(0x3f);
+
 void setup() {
   FastLED.addLeds<WS2812B, pins::LED_PIN, BRG>(leds, LED_COUNT);
   pinMode(pins::FILTER_PIN, OUTPUT);
-  pinMode(pins::LCD_BACKLIGHT_PIN, OUTPUT);
   pinMode(pins::DOOR_SWITCH_PIN, INPUT_PULLUP);
+  
+  lcd.begin(16, 2);
+  lcd.setBacklight(1);
 
   analogWrite(pins::FILTER_PIN, 0);
   fill_solid(leds, LED_COUNT, CRGB::Black);
@@ -63,9 +70,9 @@ void read_commands() {
         }
         case commands::SET_LCD_BACKLIGHT: {
           bool state = Serial.read();
-          digitalWrite(pins::LCD_BACKLIGHT_PIN, state);
+          lcd.setBacklight(state);
           Serial.write(1);
-          Serial.write(state);
+          Serial.write((char) state);
           break;
         }
         case commands::SET_FILTER: {
@@ -82,6 +89,17 @@ void read_commands() {
   }
 }
 
+/**
+ * Returns the result in degrees C.
+ */
+int get_temperature() {
+  long x = analogRead(pins::TEMPERATURE_PIN);
+  x *= 500;
+  x /= 1024;
+  x -= 50;
+  return x;
+}
+
 static unsigned long last_loop_time = 0;
 
 void loop() {
@@ -90,4 +108,12 @@ void loop() {
   read_commands();
   mode->loop(delta);
   last_loop_time = current_loop_time;
+
+  lcd.setCursor(0, 0);
+  lcd.print(String(digitalRead(pins::DOOR_SWITCH_PIN)));
+  lcd.setCursor(0, 1);
+  lcd.print(String(get_temperature()));
+  lcd.print((char)0xdf);
+  lcd.print("C");
 }
+

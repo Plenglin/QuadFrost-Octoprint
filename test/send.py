@@ -1,7 +1,7 @@
 import serial
 import time
 
-ser = serial.Serial("COM4", baudrate=19200, timeout=3)
+ser = serial.Serial("COM3", baudrate=19200, timeout=3)
 assert ser.isOpen()
 
 def read_ack(ser):
