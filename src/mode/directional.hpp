@@ -37,15 +37,15 @@ namespace quadfrost {
       switch (command) {
         case ENABLE_DIRECTION:
           enabled = (bool) Serial.read();
-          acknowledge(command, (char) enabled);
           render();
+          acknowledge(command, (char)enabled);
           break;
         case SET_DIRECTION: {
           int high = Serial.read();
           int low = Serial.read();
           position = (high << 4) | low;
-          acknowledge(command, (int) position);
           render();
+          acknowledge(command, (int)position);
           break;
         }
       }
