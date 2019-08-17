@@ -16,19 +16,9 @@ print(ser.read())
 ser.write(b'\x02\x01')  # Enable backlight
 print([hex(c) for c in read_ack(ser)])
 
-ser.write(b'\x01\x03')  # Mode 3
+ser.write(b'\x01\x01')  # Mode 1
 print([hex(c) for c in read_ack(ser)])
-ser.write(b'\x80')
-ser.write(b'\x01')
-
-pos = 0
-
-while True:
-    pos = (pos + 1) % 16
-    print(pos)
-    ser.write(b'\x81')
-    ser.write(b'\x00')
-    ser.write(bytearray(chr(pos), 'utf8'))
-    time.sleep(0.02)
+ser.write(b'\x80\x01\xff\xff')
+print([hex(c) for c in read_ack(ser)])
 
 ser.close()

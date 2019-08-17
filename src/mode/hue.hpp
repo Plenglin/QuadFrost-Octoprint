@@ -2,7 +2,7 @@
 
 #include "FastLED.h"
 #include "mode.hpp"
-#include "util/sleep.hpp"
+#include "util.hpp"
 
 namespace quadfrost {
   template <int count>
@@ -15,12 +15,12 @@ namespace quadfrost {
     byte val = 255;
     unsigned int period = 50;
   public:
+    static const char SET_PERIOD = 0x80;
     static const char SET_HUE_START = 0x81;
     static const char SET_HUE_END = 0x82;
     static const char SET_HUE_STEP = 0x83;
     static const char SET_SAT = 0x84;
     static const char SET_VAL = 0x85;
-    static const char SET_PERIOD = 0x86;
 
     HueMode(CRGB* leds) : leds(leds) {}
 
@@ -36,37 +36,30 @@ namespace quadfrost {
       switch (command) {
       case SET_HUE_START:
         hue_start = Serial.read();
-        Serial.write(1);
-        Serial.write(hue_start);
+        acknowledge(command, hue_start);
         break;
       case SET_HUE_END:
         hue_end = Serial.read();
-        Serial.write(1);
-        Serial.write(hue_end);
+        acknowledge(command, hue_end);
         break;
       case SET_HUE_STEP:
         hue_step = Serial.read();
-        Serial.write(1);
-        Serial.write(hue_step);
+        acknowledge(command, hue_step);
         break;
       case SET_PERIOD: {
         int high = Serial.read();
         int low = Serial.read();
         period = (high << 4) | low;
-        Serial.write(2);
-        Serial.write(high);
-        Serial.write(low);
+        acknowledge(command, (int) period);
         break;
       }
       case SET_SAT:
         sat = Serial.read();
-        Serial.write(1);
-        Serial.write(sat);
+        acknowledge(command, sat);
         break;
       case SET_VAL:
         val = Serial.read();
-        Serial.write(1);
-        Serial.write(val);
+        acknowledge(command, val);
         break;
       default:
         break;

@@ -5,6 +5,7 @@
 #include <LiquidCrystal_PCF8574.h>
 
 #include "constants.hpp"
+#include "util.hpp"
 #include "mode/hue.hpp"
 #include "mode/directional.hpp"
 #include "mode/lamp.hpp"
@@ -60,25 +61,23 @@ void execute_command(char command) {
       case commands::SET_MODE: {
         int mode = Serial.read();
         bool success = switch_mode(mode);
-        Serial.write(1);
-        Serial.write(success);
+        acknowledge(command, (char) success);
         break;
       }
       case commands::SET_LCD_BACKLIGHT: {
         bool state = Serial.read();
         lcd.setBacklight(state);
-        Serial.write(1);
-        Serial.write((char)state);
+        acknowledge(command, (char) state);
         break;
       }
       case commands::SET_FILTER: {
         int power = Serial.read();
         analogWrite(pins::FILTER_PIN, power);
-        Serial.write(1);
-        Serial.write(power);
+        acknowledge(command, (char)power);
         break;
       }
       default:
+        acknowledge(0, nullptr, 0);
         break;
     }
   }
@@ -88,10 +87,7 @@ void read_commands() {
   if (Serial.available() > 0) {
     delay(10);
     while (Serial.available() > 0) {
-      char command = Serial.read();
-      Serial.write(events::ACK);
-      Serial.write(command);
-      execute_command(command);
+      execute_command(Serial.read());
     }
   }
 }
@@ -128,4 +124,3 @@ void loop() {
 
   sleeper.sleep(delta);
 }
-
