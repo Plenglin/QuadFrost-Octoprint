@@ -48,4 +48,25 @@ namespace quadfrost {
       }
     }
   };
+
+  class RunEvery {
+    int msTotal;
+    int msLeft;
+    void (*func)();
+  public:
+    RunEvery(int ms, void (*func)())
+      : msTotal(ms)
+      , msLeft(ms)
+      , func(func)
+    {}
+    void update(int delta) {
+      msLeft -= delta;
+      if (msLeft < 0) {
+        (*func)();
+        while (msLeft < 0) {
+          msLeft += msTotal;
+        }
+      }
+    }
+  };
 }

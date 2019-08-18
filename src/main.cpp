@@ -116,6 +116,11 @@ int get_temperature() {
 static unsigned long last_loop_time = 0;
 AdaptiveSleeper sleeper(50000);
 
+void do_render() {
+  lcd.render();
+}
+RunEvery renderer(500, do_render);
+
 void loop() {
   unsigned long current_loop_time = millis();
   unsigned long delta = millis() - last_loop_time;
@@ -124,6 +129,7 @@ void loop() {
   read_commands();
 
   lcd.set_temperature(get_temperature());
+  renderer.update(delta);
   sleeper.target_sleep = mode->loop(delta) * 1000;
 
   sleeper.sleep(delta);

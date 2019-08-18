@@ -19,10 +19,6 @@ ser.write(b'\x02\x01')  # Enable backlight
 ser.write(b'\x01\x01')  # Mode 1
 ser.write(b'\x80')
 ser.write(struct.pack('>BBB', 255, 255, 255))
-
-for i in range(7):
-    ser.write(b'\x05')
-    ser.write(chr(i))
-    time.sleep(1)
+ser.write(b'\x05\x07')
 
 ser.close()
