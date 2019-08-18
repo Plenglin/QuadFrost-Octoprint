@@ -46,7 +46,7 @@ namespace quadfrost {
     }
 
     void set_progress(int progress) {
-      this->progress = min(max(progress, 0), 99);
+      this->progress = min(max(progress, 0), 100);
     }
 
     void render() {

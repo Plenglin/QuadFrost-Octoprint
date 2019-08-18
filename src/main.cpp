@@ -80,11 +80,13 @@ void execute_command(char command) {
         int progress = Serial.read();
         lcd.set_progress(progress);
         acknowledge(command, (char)progress);
+        break;
       }
       case commands::SET_PRINTER_STATUS: {
         int status = Serial.read();
         lcd.set_status(status);
         acknowledge(command, (char)status);
+        break;
       }
       default:
         acknowledge(0, nullptr, 0);
