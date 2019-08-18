@@ -28,10 +28,15 @@ Mode* mode = modes[0];
 
 StatusDisplay lcd(LiquidCrystal_PCF8574(0x3f));
 
-void setup() {
+void setup() {  
   FastLED.addLeds<WS2812B, pins::LED_PIN, BRG>(leds, LED_COUNT);
   pinMode(pins::FILTER_PIN, OUTPUT);
   pinMode(pins::DOOR_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(pins::POWER_LCD, OUTPUT);
+
+  // Power cycle the LCD to prevent corrupted I2C stream
+  digitalWrite(pins::POWER_LCD, false);
+  digitalWrite(pins::POWER_LCD, true);
 
   lcd.begin();
   
@@ -121,7 +126,7 @@ AdaptiveSleeper sleeper(50000);
 void do_render() {
   lcd.render();
 }
-RunEvery renderer(500, do_render);
+RunEvery renderer(250, do_render);
 
 void loop() {
   unsigned long current_loop_time = millis();

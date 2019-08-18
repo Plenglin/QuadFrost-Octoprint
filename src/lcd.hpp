@@ -25,6 +25,8 @@ namespace quadfrost {
     StatusDisplay(LiquidCrystal_PCF8574 lcd) : lcd(lcd) {}
 
     void begin() {
+      lcd.noDisplay();
+      lcd.display();
       lcd.begin(16, 2);
       lcd.clear();
       lcd.setBacklight(true);
@@ -50,17 +52,26 @@ namespace quadfrost {
     }
 
     void render() {
-      lcd.clear();
+      // Clear first line
+      lcd.setCursor(0, 0);
+      lcd.print("                ");
+
+      // Write status
       lcd.setCursor(0, 0);
       lcd.print(DISPLAY_STATUS_NAMES[status]);
 
+      // Write temperature
       auto strTemp = String(temperature);
-
       lcd.setCursor(14 - strTemp.length(), 0);
       lcd.print(strTemp);
       lcd.print((char)0xdf);
       lcd.print("C");
 
+      // Clear second line
+      lcd.setCursor(0, 1);
+      lcd.print("                ");
+
+      // Draw progress bar
       lcd.setCursor(0, 1);
       lcd.print("[");
       int ticks = (progress + 5) / 10;
@@ -68,11 +79,13 @@ namespace quadfrost {
         if (i <= ticks) {
           lcd.write((char)0xff);
         } else {
-          lcd.print(" ");
+          break;
         }
       }
+      lcd.setCursor(11, 1);
       lcd.print("]");
 
+      // Write progress
       auto strProg = String(progress);
       lcd.setCursor(15 - strProg.length(), 1);
       lcd.print(strProg);
