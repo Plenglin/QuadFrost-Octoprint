@@ -7,15 +7,6 @@ import flask
 
 from . import quadfrost
 
-EVENT_STATUS_MAP = {
-    'Connected': 1,
-    'Disconnected': 7,
-    'PrintDone': 5,
-    'PrintResumed': 2,
-    'PrintStarted': 2,
-    'PrintPaused': 6
-}
-
 class QuadfrostPlugin(
     opl.BlueprintPlugin,
     opl.StartupPlugin,
@@ -39,19 +30,25 @@ class QuadfrostPlugin(
     
     def on_print_progress(self, storage, path, progress):
         if self.quadfrost is not None:
-            self.quadfrost.set_status(2)
             self.quadfrost.set_progress(progress)
     
     def on_event(self, event, payload):
         if self.quadfrost is not None:
-            if event in EVENT_STATUS_MAP:
-                code = EVENT_STATUS_MAP[event]
-                self._logger.info("Received %s event. Setting status to %s.", event, code)
-                self.quadfrost.set_status(code)
+            if event == 'Connected':
+                self.quadfrost.set_status(1).set_lamp_mode().set_color(255, 255, 255)
+            elif event == 'PrintDone':
+                self.quadfrost.set_status(5).set_progress(100).set_lamp_mode().set_color(0, 255, 0)
+            elif event == 'PrintStarted':
+                self.quadfrost.set_status(2).set_progress(0).set_hue_mode().set_hue_range(0, 64).set_rate(1, 50).set_sat_val(128, 255)
+            elif event == 'PrintPaused':
+                self.quadfrost.set_status(6).set_empty_mode()
+            elif event == 'PrintResumed':
+                self.quadfrost.set_status(2).set_hue_mode()
+            elif event == 'Disconnected':
+                self.quadfrost.set_status(7).set_lamp_mode().set_color(128, 192, 0)
             elif event == 'PrintFailed':
-                reason = payload['reason']
-                code = {'cancelled': 3, 'error': 4}[reason]
-                self._logger.info("Received %s event with reason %s. Setting status to %s.", event, reason, code)
+                code = {'cancelled': 3, 'error': 4}[payload['reason']]
+                self.quadfrost.set_status(code).set_lamp_mode().set_color(255, 0, 0)
 
     def get_template_configs(self):
         return [

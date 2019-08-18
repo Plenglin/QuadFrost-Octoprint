@@ -108,6 +108,18 @@ class QuadFrost:
         _logger.debug("Mode changed: i=%s, %s", mode_i, self.mode)
         return self.mode
     
+    def set_empty_mode(self):
+        return self.set_mode(MODE_EMPTY)
+    
+    def set_lamp_mode(self):
+        return self.set_mode(MODE_LAMP)
+    
+    def set_hue_mode(self):
+        return self.set_mode(MODE_HUE)
+    
+    def set_direction_mode(self):
+        return self.set_mode(MODE_DIRECTION)
+    
     def set_status(self, status_i):
         self.ser.write('\x05')
         self.ser.write(chr(status_i))
