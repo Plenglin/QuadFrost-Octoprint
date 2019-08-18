@@ -22,7 +22,7 @@ ser.write(struct.pack('>BBB', 255, 255, 255))
 ser.write(b'\x05\x07')
 ser.write('\x04\x00')
 
-for i in range(101):
+for i in range(1, 1000, 1):
     ser.write(b'\x04')  # Set progress
     ser.write(chr(i))
     time.sleep(0.05)

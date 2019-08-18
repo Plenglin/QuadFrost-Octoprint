@@ -32,33 +32,14 @@ namespace quadfrost {
       lcd.setBacklight(true);
       set_status(0);
       set_progress(0);
-      render();
     }
 
     void set_temperature(int temperature) {
       this->temperature = temperature;
-    }
-    
-    void set_status(int status) {
-      this->status = status;
-    }
 
-    void set_backlight(bool state) {
-      lcd.setBacklight(state);
-    }
-
-    void set_progress(int progress) {
-      this->progress = min(max(progress, 0), 100);
-    }
-
-    void render() {
-      // Clear first line
-      lcd.setCursor(0, 0);
-      lcd.print("                ");
-
-      // Write status
-      lcd.setCursor(0, 0);
-      lcd.print(DISPLAY_STATUS_NAMES[status]);
+      // Clear temperature
+      lcd.setCursor(12, 0);
+      lcd.print("    ");
 
       // Write temperature
       auto strTemp = String(temperature);
@@ -66,10 +47,23 @@ namespace quadfrost {
       lcd.print(strTemp);
       lcd.print((char)0xdf);
       lcd.print("C");
+    }
 
-      // Clear second line
-      lcd.setCursor(0, 1);
-      lcd.print("                ");
+    void set_status(int status) {
+      this->status = status;
+      
+      // Write status
+      lcd.setCursor(0, 0);
+      lcd.print(DISPLAY_STATUS_NAMES[status]);
+    }
+
+    void set_backlight(bool state) {
+      lcd.setBacklight(state);
+    }
+
+    void set_progress(int progress) {
+      progress = min(max(progress, 0), 100);
+      this->progress = progress;
 
       // Draw progress bar
       lcd.setCursor(0, 1);
@@ -79,12 +73,16 @@ namespace quadfrost {
         if (i <= ticks) {
           lcd.write((char)0xff);
         } else {
-          break;
+          lcd.write(" ");
         }
       }
       lcd.setCursor(11, 1);
       lcd.print("]");
 
+      // Clear progress
+      lcd.setCursor(12, 1);
+      lcd.print("    ");
+      
       // Write progress
       auto strProg = String(progress);
       lcd.setCursor(15 - strProg.length(), 1);
