@@ -5,6 +5,7 @@
 #include <LiquidCrystal_PCF8574.h>
 
 #include "constants.hpp"
+#include "lcd.hpp"
 #include "util.hpp"
 #include "mode/hue.hpp"
 #include "mode/directional.hpp"
@@ -25,16 +26,15 @@ Mode* modes[MODES_COUNT] = {
 };
 Mode* mode = modes[0];
 
-LiquidCrystal_PCF8574 lcd(0x3f);
+StatusDisplay lcd(LiquidCrystal_PCF8574(0x3f));
 
 void setup() {
   FastLED.addLeds<WS2812B, pins::LED_PIN, BRG>(leds, LED_COUNT);
   pinMode(pins::FILTER_PIN, OUTPUT);
   pinMode(pins::DOOR_SWITCH_PIN, INPUT_PULLUP);
-  
-  lcd.begin(16, 2);
-  lcd.setBacklight(1);
 
+  lcd.begin();
+  
   analogWrite(pins::FILTER_PIN, 0);
   fill_solid(leds, LED_COUNT, CRGB::Black);
   FastLED.show();
@@ -58,7 +58,7 @@ void execute_command(char command) {
     mode->on_command(command);
   } else {
     switch (command) {
-      case commands::SET_MODE: {
+      case commands::SET_LED_MODE: {
         int mode = Serial.read();
         bool success = switch_mode(mode);
         acknowledge(command, (char) success);
@@ -66,15 +66,25 @@ void execute_command(char command) {
       }
       case commands::SET_LCD_BACKLIGHT: {
         bool state = Serial.read();
-        lcd.setBacklight(state);
+        lcd.set_backlight(state);
         acknowledge(command, (char) state);
         break;
       }
       case commands::SET_FILTER: {
         int power = Serial.read();
         analogWrite(pins::FILTER_PIN, power);
-        acknowledge(command, (char)power);
+        acknowledge(command, (char) power);
         break;
+      }
+      case commands::SET_PROGRESS: {
+        int progress = Serial.read();
+        lcd.set_progress(progress);
+        acknowledge(command, (char)progress);
+      }
+      case commands::SET_PRINTER_STATUS: {
+        int status = Serial.read();
+        lcd.set_status(status);
+        acknowledge(command, (char)status);
       }
       default:
         acknowledge(0, nullptr, 0);
@@ -113,14 +123,8 @@ void loop() {
 
   read_commands();
 
+  lcd.set_temperature(get_temperature());
   sleeper.target_sleep = mode->loop(delta) * 1000;
-
-  lcd.setCursor(0, 0);
-  lcd.print(String(digitalRead(pins::DOOR_SWITCH_PIN)));
-  lcd.setCursor(0, 1);
-  lcd.print(String(get_temperature()));
-  lcd.print((char)0xdf);
-  lcd.print("C");
 
   sleeper.sleep(delta);
 }

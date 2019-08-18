@@ -8,10 +8,13 @@ namespace quadfrost {
     const int TEMPERATURE_PIN = A0;
     const int DOOR_SWITCH_PIN = A1;
   }
+  
   namespace commands {
-    const char SET_MODE = 0x01;
+    const char SET_LED_MODE = 0x01;
     const char SET_LCD_BACKLIGHT = 0x02;
     const char SET_FILTER = 0x03;
+    const char SET_PROGRESS = 0x04;
+    const char SET_PRINTER_STATUS = 0x05;
 
     /** 0x80-0xff are reserved for modes to use */
   } 
