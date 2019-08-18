@@ -8,8 +8,10 @@ $(function() {
     function QuadfrostViewModel(parameters) {
         console.log("binding quadfrost")
         var self = this;
-        self.settings = parameters[0];
-        self.serialPort = ko.observable();
+        self.loginState = parameters[0];
+        self.settings = parameters[1];
+
+        self.newSerialPort = ko.observable();
         self.lampState = ko.observable();
         self.filterState = ko.observable();
 
@@ -44,7 +46,11 @@ $(function() {
         });
 
         self.connectToSerial = function() {
-            self.currentSerialPort(self.newSerialPort);
+            var port = self.newSerialPort();
+            console.info("Attempting to connect to serial port", port);
+            $.post('/plugin/quadfrost/serialport', {
+                serialport: port
+            });
         };
 
         self.onBeforeBinding = function() {
@@ -58,9 +64,7 @@ $(function() {
      */
     OCTOPRINT_VIEWMODELS.push({
         construct: QuadfrostViewModel,
-        // ViewModels your plugin depends on, e.g. loginStateViewModel, settingsViewModel, ...
-        dependencies: ["settingsViewModel"],
-        // Elements to bind to, e.g. #settings_plugin_quadfrost, #tab_plugin_quadfrost, ...
-        elements: [ "#tab-quadfrost" ]
+        dependencies: ["loginStateViewModel", "settingsViewModel"],
+        elements: ["#tab_quadfrost"]
     });
 });

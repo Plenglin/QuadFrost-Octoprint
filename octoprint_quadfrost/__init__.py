@@ -21,12 +21,7 @@ class QuadfrostPlugin(
 
     def on_after_startup(self):
         port = self._settings.get(['port'])
-        self._logger.info('Connecting to Arduino at %s', port)
-        try:
-            self.quadfrost = quadfrost.QuadFrost(port)
-            self._logger.info("Successfully connected to Arduino at %s", port)
-        except Exception as e:
-            self._logger.error("Error while initializing Arduino", exc_info=True)
+        self.connect_to(port)
     
     def on_print_progress(self, storage, path, progress):
         if self.quadfrost is not None:
@@ -39,7 +34,7 @@ class QuadfrostPlugin(
             elif event == 'PrintDone':
                 self.quadfrost.set_status(5).set_progress(100).set_lamp_mode().set_color(0, 255, 0)
             elif event == 'PrintStarted':
-                self.quadfrost.set_status(2).set_progress(0).set_hue_mode().set_hue_range(0, 64).set_rate(1, 50).set_sat_val(128, 255)
+                self.quadfrost.set_status(2).set_progress(0).set_hue_mode().set_hue_range(0, 64).set_rate(1, 200).set_sat_val(192, 255)
             elif event == 'PrintPaused':
                 self.quadfrost.set_status(6).set_empty_mode()
             elif event == 'PrintResumed':
@@ -67,6 +62,29 @@ class QuadfrostPlugin(
             less=["less/quadfrost.less"]
         )
 
+    def connect_to(self, serial_port):
+        self._logger.info('Connecting to Arduino at %s', serial_port)
+        try:
+            self.quadfrost = quadfrost.QuadFrost(serial_port)
+            self._logger.info("Successfully connected to Arduino at %s", serial_port)
+            self._settings.set(['port'], serial_port)
+            return True
+        except Exception as e:
+            self._logger.error("Error while initializing Arduino", exc_info=True)
+            return False
+    
+    def close_serial(self):
+        if self.quadfrost is not None:
+            self._logger.info("Closing serial")
+            self.quadfrost.close()
+
+    @opl.BlueprintPlugin.route("/serialport", methods=["POST"])
+    def endpoint_serialport(self):
+        port = flask.request.values['serialport']
+        self.close_serial()
+        result = self.connect_to(port)
+        return (port, 200) if result else ("", 500)
+
     @opl.BlueprintPlugin.route("/lamp", methods=["POST"])
     def endpoint_lamp(self):
         r = int(flask.request.values['red'])
@@ -75,7 +93,7 @@ class QuadfrostPlugin(
         if self.quadfrost is not None:
             self._logger.info("Setting lamp to %s %s %s", r, g, b)
             self.quadfrost.set_mode(quadfrost.MODE_LAMP).set_color(r, g, b)
-            return "", 204
+            return "[%s, %s, %s]" % (r, g, b), 204
         else:
             self._logger.warn("Failed to set Arduino: not connected")
             return "", 503
@@ -86,15 +104,13 @@ class QuadfrostPlugin(
         if self.quadfrost is not None:
             self._logger.info("Setting filter to %s", power)
             self.quadfrost.set_filter(power)
+            return "%s" % power, 204
         else:
             self._logger.warn("Failed to set Arduino: not connected")
-        return ""
-    
+            return "", 503
+        
     def on_shutdown(self):
-        if self.quadfrost is not None:
-            self._logger.info("Closing serial")
-            self.quadfrost.close()
-
+        self.close_serial()
 
 __plugin_name__ = "Quadfrost"
 __plugin_implementation__ = QuadfrostPlugin()

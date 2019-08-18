@@ -1,10 +1,16 @@
-<div id="tab-quadfrost" class="input-append">
-    <input type="text" class="input-xxlarge" data-bind="value: serialPort">
-    <button class="btn btn-primary" data-bind="click: connectToSerial">Connect</button>
+<div id="tab_quadfrost">
+    <div>
+        <input type="text" class="input-xxlarge" data-bind="value: newSerialPort">
+        <button class="btn btn-primary" data-bind="click: connectToSerial">Connect</button>
+    </div>
 
-    <input id="quadfrost-light" type="checkbox" class="custom-control-input" data-bind="checked: lampState">
-    <label class="custom-control-label" for="lamp">Lights</label>
+    <div>
+        <input id="quadfrost-light" type="checkbox" class="custom-control-input" data-bind="checked: lampState">
+        <label class="custom-control-label" for="lamp">Lights</label>
+    </div>
 
-    <input id="quadfrost-filter" type="checkbox" class="custom-control-input" data-bind="checked: filterState">
-    <label class="custom-control-label" for="lamp">Filter</label>
+    <div>
+        <input id="quadfrost-filter" type="checkbox" class="custom-control-input" data-bind="checked: filterState">
+        <label class="custom-control-label" for="lamp">Filter</label>
+    </div>
 </div>
