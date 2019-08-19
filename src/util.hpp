@@ -31,15 +31,17 @@ namespace quadfrost {
   }
 
   class AdaptiveSleeper {
-    int next_sleep;
+    long next_sleep;
 
-   public:
-    int target_sleep;
-    AdaptiveSleeper(int target_sleep)
-        : next_sleep(target_sleep), target_sleep(target_sleep) {}
+  public:
+    long target_sleep;
+    AdaptiveSleeper(long target_sleep)
+      : next_sleep(target_sleep)
+      , target_sleep(target_sleep)
+    {}
 
     void sleep(long actual_period) {
-      int error = target_sleep - actual_period;
+      long error = target_sleep - actual_period;
       if (error > 0 || next_sleep > 0) {
         next_sleep += error;
       }
@@ -50,16 +52,16 @@ namespace quadfrost {
   };
 
   class RunEvery {
-    int msTotal;
-    int msLeft;
+    long msTotal;
+    long msLeft;
     void (*func)();
   public:
-    RunEvery(int ms, void (*func)())
+    RunEvery(long ms, void (*func)())
       : msTotal(ms)
       , msLeft(ms)
       , func(func)
     {}
-    void update(int delta) {
+    void update(long delta) {
       msLeft -= delta;
       if (msLeft < 0) {
         (*func)();
