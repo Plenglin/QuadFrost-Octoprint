@@ -18,16 +18,19 @@ class EmptyMode:
 
 class LampMode:
     def __init__(self, parent):
+        self.parent = parent
         self.ser = parent.ser
 
     def set_color(self, r, g, b):
         self.ser.write('\x80')
         self.ser.write(struct.pack('>BBB', r, g, b))
+        self.parent.read_response()
         return self
 
 
 class HueMode:
     def __init__(self, parent):
+        self.parent = parent
         self.ser = parent.ser
     
     def set_hue_range(self, hue_start, hue_end):
@@ -35,25 +38,29 @@ class HueMode:
         self.ser.write(chr(hue_start))
         self.ser.write('\x82')
         self.ser.write(chr(hue_end))
+        self.parent.read_response()
         return self
 
     def set_rate(self, step, period):
         self.ser.write('\x83')
         self.ser.write(chr(step))
-        self.ser.write('\x86')
-        self.ser.write(chr(period))
+        self.ser.write('\x80')
+        self.ser.write(struct.pack('>H', period))
+        self.parent.read_response()
         return self
 
     def set_sat_val(self, sat, val):
         self.ser.write('\x84')
         self.ser.write(chr(sat))
-        self.ser.write('\x80')
+        self.ser.write('\x85')
         self.ser.write(chr(val))
+        self.parent.read_response()
         return self
 
 
 class DirectionMode:
     def __init__(self, parent):
+        self.parent = parent
         self.ser = parent.ser
 
     def enable_direction(self, pos):
@@ -62,16 +69,19 @@ class DirectionMode:
         else:
             self.ser.write('\x80\x01\x81')
             self.ser.write(struct.pack('>h', pos))
+        self.parent.read_response()
         return self
 
     def set_on_color(self, r, g, b):
         self.ser.write('\x82')
         self.ser.write(struct.pack('>BBB', r, g, b))
+        self.parent.read_response()
         return self
 
     def set_off_color(self, r, g, b):
         self.ser.write('\x83')
         self.ser.write(struct.pack('>BBB', r, g, b))
+        self.parent.read_response()
         return self
 
 class ConnectionFailedError(Exception):
@@ -94,17 +104,18 @@ class QuadFrost:
         self.set_progress(0)
     
     def read_response(self):
-        ev = ord(ser.read())
+        ev = ord(self.ser.read())
         if ev != 0x01:
             return None
-        cmd = ord(ser.read())
-        size = ord(ser.read())
-        return cmd, [ord(i) for i in ser.read(size)]
+        cmd = ord(self.ser.read())
+        size = ord(self.ser.read())
+        return cmd, [ord(i) for i in self.ser.read(size)]
 
     def set_mode(self, mode_i):
         self.mode = self.modes[mode_i]
         self.ser.write('\x01')
         self.ser.write(chr(mode_i))
+        self.read_response()
         _logger.debug("Mode changed: i=%s, %s", mode_i, self.mode)
         return self.mode
     
@@ -123,11 +134,13 @@ class QuadFrost:
     def set_status(self, status_i):
         self.ser.write('\x05')
         self.ser.write(chr(status_i))
+        self.read_response()
         return self
     
     def set_progress(self, progress):
         self.ser.write('\x04')
         self.ser.write(chr(progress))
+        self.read_response()
         return self
     
     def get_mode(self):
@@ -136,14 +149,24 @@ class QuadFrost:
     def set_filter(self, power):
         self.ser.write('\x03')
         self.ser.write(chr(power))
+        self.read_response()
         return self
 
     def set_lcd_backlight(self, state):
         self.ser.write('\x02')
         self.ser.write('\x01' if state else '\x00')
+        self.read_response()
         return self
 
     def close(self):
-        _logger.info("Closing")
-        self.set_status(0)
-        self.ser.close()
+        if self.ser.isOpen():
+            _logger.info("Closing")
+            try:
+                self.set_status(0)
+            except Exception as e:
+                _logger.warn("Failure while attempting to reset status")
+                _logger.warn(e)
+            finally:
+                self.ser.close()
+        else:
+            _logger.warn("Failed to close: already disconnected")

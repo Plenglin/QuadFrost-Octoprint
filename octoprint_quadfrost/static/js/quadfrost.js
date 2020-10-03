@@ -1,7 +1,7 @@
 /*
  * View model for OctoPrint-Quadfrost
  *
- * Author: You
+ * Author: Plenglin
  * License: AGPLv3
  */
 $(function() {
@@ -54,7 +54,8 @@ $(function() {
         };
 
         self.onBeforeBinding = function() {
-            self.serialPort(self.settings.settings.plugins.quadfrost.port());
+            console.log(self.settings);
+            self.newSerialPort(self.settings.settings.plugins.quadfrost.port());
         };
     }
 

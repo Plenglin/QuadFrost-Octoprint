@@ -34,16 +34,18 @@ class QuadfrostPlugin(
             elif event == 'PrintDone':
                 self.quadfrost.set_status(5).set_progress(100).set_lamp_mode().set_color(0, 255, 0)
             elif event == 'PrintStarted':
-                self.quadfrost.set_status(2).set_progress(0).set_hue_mode().set_hue_range(0, 64).set_rate(1, 200).set_sat_val(192, 255)
+                self.quadfrost.set_status(2).set_progress(0).set_hue_mode().set_rate(1, 200).set_sat_val(100, 192).set_hue_range(0, 64)
             elif event == 'PrintPaused':
                 self.quadfrost.set_status(6).set_empty_mode()
             elif event == 'PrintResumed':
                 self.quadfrost.set_status(2).set_hue_mode()
             elif event == 'Disconnected':
-                self.quadfrost.set_status(7).set_lamp_mode().set_color(128, 192, 0)
+                self.quadfrost.set_status(7).set_lamp_mode().set_color(128, 64, 0)
             elif event == 'PrintFailed':
-                code = {'cancelled': 3, 'error': 4}[payload['reason']]
-                self.quadfrost.set_status(code).set_lamp_mode().set_color(255, 0, 0)
+                reason = payload['reason']
+                code = {'cancelled': 3, 'error': 4}[reason]
+                color = {'cancelled': (255, 128, 0), 'error': (255, 0, 0)}[reason]
+                self.quadfrost.set_status(code).set_lamp_mode().set_color(*color)
 
     def get_template_configs(self):
         return [
